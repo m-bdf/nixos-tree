@@ -22,6 +22,7 @@
 
         nixos-tree = pkgs.mkShell {
           inputsFrom = [ packages.nixos-tree ];
+          packages = [ pkgs.rustfmt pkgs.rust-analyzer ];
           CARGO_HOME = pkgs.writeTextDir "config" ''
             [source.crates-io]
             directory = "${packages.nixos-tree.cargoDeps}"

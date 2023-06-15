@@ -418,7 +418,6 @@ dependencies = [
  "clap",
  "cursive",
  "regex",
- "serde",
  "serde_json",
 ]
 

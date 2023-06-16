@@ -6,7 +6,8 @@ struct Args {
     flake: String,
 }
 
-use cursive::view::Resizable;
+use cursive::view::{Resizable, Scrollable};
+use cursive_tree_view::Placement;
 use serde_json::Value;
 //type Object = std::collections::HashMap<String, String>;
 
@@ -64,6 +65,20 @@ fn get_url(flake_uri: &str) -> String {
 fn get_hostname() -> String {
     std::fs::read_to_string("/proc/sys/kernel/hostname")
         .map_or("default".to_string(), |s| s.trim().to_string())
+}
+
+type TreeView = cursive_tree_view::TreeView<String>;
+
+fn insert_options(layout: &mut TreeView, options: &Value, parent: usize) {
+    for (i, (n, v)) in options.as_object().unwrap().iter().enumerate() {
+        layout.insert_item(n.clone(), Placement::LastChild, parent);
+
+        if v.is_object() {
+            insert_options(layout, v, parent + i + 1);
+        }
+    }
+
+    layout.collapse_item(parent);
 }
 
 fn main() {
@@ -160,17 +175,23 @@ fn main() {
         .child(
             SelectView::<Value>::new()
                 .with_name("parents")
+                .scrollable()
                 .full_screen(),
         )
-        .child(tree_view.full_screen())
+        .child(tree_view.scrollable().full_screen())
         .child(
             SelectView::<Value>::new()
                 .with_name("children")
+                .scrollable()
                 .full_screen(),
         );
 
+    let mut layout = cursive_tree_view::TreeView::new();
+    layout.insert_item("options".to_string(), Placement::Parent, 0);
+    insert_options(&mut layout, &options, 0);
+
     let mut root = Cursive::new();
-    root.add_fullscreen_layer(layout);
+    root.add_fullscreen_layer(layout.scrollable().full_screen());
     root.add_global_callback('q', |s| s.quit());
     root.run();
 }

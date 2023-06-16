@@ -8,3 +8,4 @@ clap = { version = "4", features = ["derive"] }
 regex = "1"
 serde_json = "1"
 cursive = "0"
+cursive_tree_view = "0"
